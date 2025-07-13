@@ -412,7 +412,7 @@
             "Chhattisgarh": ["Balod", "Baloda Bazar", "Balrampur-Ramanujganj", "Bastar", "Bemetara", "Bijapur", "Bilaspur", "Dantewada", "Dhamtari", "Durg", "Gariaband", "Gaurela-Pendra-Marwahi", "Janjgir-Champa", "Jashpur", "Kabirdham", "Kanker", "Kondagaon", "Korba", "Korea", "Mahasamund", "Mungeli", "Narayanpur", "Raigarh", "Raipur", "Rajnandgaon", "Sukma", "Surajpur", "Surguja"],
             "Goa": ["North Goa", "South Goa"],
             "Gujarat": ["Ahmedabad", "Amreli", "Anand", "Aravalli", "Banaskantha", "Bharuch", "Bhavnagar", "Botad", "Chhota Udaipur", "Dahod", "Dang", "Devbhoomi Dwarka", "Gandhinagar", "Gir Somnath", "Jamnagar", "Junagadh", "Kheda", "Kutch", "Mahisagar", "Mehsana", "Morbi", "Narmada", "Navsari", "Panchmahal", "Patan", "Porbandar", "Rajkot", "Sabarkantha", "Surat", "Surendranagar", "Tapi", "Vadodara", "Valsad"],
-            "Haryana": ["Ambala", "Bhiwani", "Charkhi Dadri", "Faridabad", "Fatehabad", "Gurugram", "Hisar", "Jhajjar", "Jind", "Kaithal", "Karnal", "Kurukshetra", "Mahendragarh", "Nuh", "Palwal", "Panchkula", "Panipat", "Rewari", "Rohtak", "Sirsa", "Sonipat", "Yamunanagar"],
+            "Haryana": ["Ambala", "Bhiwani", "Charkhi Dadri", "Faridabad", "Fatehbad", "Gurugram", "Hisar", "Jhajjar", "Jind", "Kaithal", "Karnal", "Kurukshetra", "Mahendragarh", "Nuh", "Palwal", "Panchkula", "Panipat", "Rewari", "Rohtak", "Sirsa", "Sonipat", "Yamunanagar"],
             "Himachal Pradesh": ["Bilaspur", "Chamba", "Hamirpur", "Kangra", "Kinnaur", "Kullu", "Lahaul and Spiti", "Mandi", "Shimla", "Sirmaur", "Solan", "Una"],
             "Jharkhand": ["Bokaro", "Chatra", "Deoghar", "Dhanbad", "Dumka", "East Singhbhum", "Garhwa", "Giridih", "Godda", "Gumla", "Hazaribagh", "Jamtara", "Khunti", "Koderma", "Latehar", "Lohardaga", "Pakur", "Palamu", "Ramgarh", "Ranchi", "Sahebganj", "Seraikela-Kharsawan", "Simdega", "West Singhbhum"],
             "Karnataka": ["Bagalkot", "Ballari", "Belagavi", "Bengaluru Rural", "Bengaluru Urban", "Bidar", "Chamarajanagar", "Chikkaballapur", "Chikkamagaluru", "Chitradurga", "Dakshina Kannada", "Davangere", "Dharwad", "Gadag", "Hassan", "Haveri", "Kalaburagi", "Kodagu", "Kolar", "Koppal", "Mandya", "Mysuru", "Raichur", "Ramanagara", "Shivamogga", "Tumakuru", "Udupi", "Uttara Kannada", "Vijayapura", "Yadgiri", "Vijayanagara"],
@@ -558,7 +558,7 @@
                 const checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
                 checkbox.id = `book-${index}`;
-                checkbox.name = 'booksRequired';
+                checkbox.name = 'booksRequired'; // Keep the name attribute for Getform
                 checkbox.value = book;
                 checkbox.className = 'form-checkbox h-5 w-5 text-indigo-600 rounded'; // Tailwind for styling
 
@@ -584,19 +584,15 @@
 
         // Function to get form data
         function getFormData() {
-            // Collect selected books from checkboxes
-            const selectedBooks = Array.from(booksRequiredCheckboxesDiv.querySelectorAll('input[name="booksRequired"]:checked'))
-                                     .map(checkbox => checkbox.value);
-
-            // Create a FormData object directly from the form
             const formData = new FormData(studentForm);
 
-            // Manually add the selected books as a single field (Getform will parse this)
-            // If you want each book as a separate field, you'd iterate and append.
-            // For simplicity and Getform's ability to handle arrays, we'll join them.
-            formData.set('booksRequired', selectedBooks.join('; ')); // Join with a separator for clarity in Getform
+            // Getform handles multiple checkboxes with the same name correctly.
+            // We just need to ensure the `declarationChecked` field is sent with 'हाँ'/'नहीं'.
+            // The `booksRequired` checkboxes already have `name="booksRequired"`,
+            // so `new FormData(studentForm)` will collect them automatically.
+            // We only need to manually manage fields that don't have a 'name' or need custom value.
 
-            // Add declaration status
+            // Explicitly set declaration status as 'हाँ' or 'नहीं'
             formData.set('declarationChecked', document.getElementById('declaration').checked ? 'हाँ' : 'नहीं');
 
             return formData;
@@ -607,8 +603,20 @@
             const formData = getFormData(); // Get data for validation
             const rawFormData = {}; // Create a simple object to access values for validation
 
+            // Convert FormData to a plain object for easier validation checks
             for (let [key, value] of formData.entries()) {
-                rawFormData[key] = value;
+                // For multiple 'booksRequired' entries, FormData.entries() will give them one by one.
+                // We need to handle this to get all selected books for validation if needed.
+                // However, for basic presence check, the form's 'required' attribute is better.
+                if (key === 'booksRequired') {
+                    // Collect all booksRequired values into an array for validation purposes
+                    if (!rawFormData[key]) {
+                        rawFormData[key] = [];
+                    }
+                    rawFormData[key].push(value);
+                } else {
+                    rawFormData[key] = value;
+                }
             }
 
             // Basic validation for required fields
