@@ -351,7 +351,7 @@
                 <label for="year">वर्ष</label>
                 <select id="year" name="year" required class="rounded-lg">
                     <option value="">वर्ष चुनें</option>
-                    <option value="1st Year">पहला वर्ष</moption>
+                    <option value="1st Year">पहला वर्ष</option>
                     <option value="2nd Year">दूसरा वर्ष</option>
                     <option value="3rd Year">तीसरा वर्ष</option>
                     <option value="4th Year">चौथा वर्ष</option>
@@ -489,6 +489,7 @@
         const studentForm = document.getElementById('studentForm');
         const messageBox = document.getElementById('messageBox');
         const captchaQuestionSpan = document.getElementById('captchaQuestion');
+        const submitButton = document.querySelector('.submit-button'); // Get the submit button
         let captchaAnswer = 0; // To store the correct CAPTCHA answer
 
         // Function to generate CAPTCHA
@@ -587,83 +588,79 @@
             const selectedBooks = Array.from(booksRequiredCheckboxesDiv.querySelectorAll('input[name="booksRequired"]:checked'))
                                      .map(checkbox => checkbox.value);
 
-            return {
-                name: document.getElementById('name').value,
-                fatherName: document.getElementById('fatherName').value,
-                phone: document.getElementById('phone').value,
-                email: document.getElementById('email').value,
-                dob: document.getElementById('dob').value,
-                gender: document.getElementById('gender').value,
-                category: document.getElementById('category').value,
-                address1: document.getElementById('address1').value,
-                address2: document.getElementById('address2').value,
-                state: document.getElementById('state').value,
-                district: document.getElementById('district').value,
-                aadhar: document.getElementById('aadhar').value,
-                samagraId: document.getElementById('samagraId').value,
-                mptaascId: document.getElementById('mptaascId').value,
-                isEWS: document.getElementById('isEWS').value,
-                course: document.getElementById('course').value,
-                year: document.getElementById('year').value,
-                booksRequired: selectedBooks, // Now an array of selected books
-                subjects: document.getElementById('subjects').value.split(',').map(s => s.trim()).filter(s => s),
-                captchaInput: document.getElementById('captchaInput').value, // Get CAPTCHA input
-                declarationChecked: document.getElementById('declaration').checked // Get declaration checkbox state
-            };
+            // Create a FormData object directly from the form
+            const formData = new FormData(studentForm);
+
+            // Manually add the selected books as a single field (Getform will parse this)
+            // If you want each book as a separate field, you'd iterate and append.
+            // For simplicity and Getform's ability to handle arrays, we'll join them.
+            formData.set('booksRequired', selectedBooks.join('; ')); // Join with a separator for clarity in Getform
+
+            // Add declaration status
+            formData.set('declarationChecked', document.getElementById('declaration').checked ? 'हाँ' : 'नहीं');
+
+            return formData;
         }
 
         // Function to validate form data
-        function validateFormData(formData) {
+        function validateFormData() {
+            const formData = getFormData(); // Get data for validation
+            const rawFormData = {}; // Create a simple object to access values for validation
+
+            for (let [key, value] of formData.entries()) {
+                rawFormData[key] = value;
+            }
+
             // Basic validation for required fields
-            if (!formData.name || !formData.fatherName || !formData.phone || !formData.email || !formData.dob || !formData.gender || !formData.category || !formData.address1 || !formData.state || !formData.district || !formData.aadhar || !formData.isEWS || !formData.course || !formData.year) {
+            if (!rawFormData.name || !rawFormData.fatherName || !rawFormData.phone || !rawFormData.email || !rawFormData.dob || !rawFormData.gender || !rawFormData.category || !rawFormData.address1 || !rawFormData.state || !rawFormData.district || !rawFormData.aadhar || !rawFormData.isEWS || !rawFormData.course || !rawFormData.year) {
                 showMessage('कृपया सभी आवश्यक फ़ील्ड भरें।', true); // Translated message
                 return false;
             }
 
             // Validate 10-digit phone number
             const phonePattern = /^[0-9]{10}$/;
-            if (!phonePattern.test(formData.phone)) {
+            if (!phonePattern.test(rawFormData.phone)) {
                 showMessage('कृपया 10 अंकों का वैध फ़ोन नंबर दर्ज करें।', true); // Translated message
                 return false;
             }
 
             // Validate email format
             const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailPattern.test(formData.email)) {
+            if (!emailPattern.test(rawFormData.email)) {
                 showMessage('कृपया एक वैध ईमेल पता दर्ज करें।', true); // Translated message
                 return false;
             }
 
             // Validate 12-digit Aadhar ID
             const aadharPattern = /^[0-9]{12}$/;
-            if (!aadharPattern.test(formData.aadhar)) {
+            if (!aadharPattern.test(rawFormData.aadhar)) {
                 showMessage('कृपया 12 अंकों का वैध आधार आईडी दर्ज करें।', true); // Translated message
                 return false;
             }
 
             // Validate 9-digit Samagra ID (if entered)
-            const samagraId = formData.samagraId.trim();
+            const samagraId = rawFormData.samagraId ? rawFormData.samagraId.trim() : '';
             if (samagraId !== '' && !/^[0-9]{9}$/.test(samagraId)) {
                 showMessage('समग्र आईडी दर्ज करने पर ठीक 9 अंकों का होना चाहिए।', true); // Translated message
                 return false;
             }
 
             // Validate MPTAASC Profile ID (if entered)
-            const mptaascId = formData.mptaascId.trim();
+            const mptaascId = rawFormData.mptaascId ? rawFormData.mptaascId.trim() : '';
             if (mptaascId !== '' && !/^[A-Za-z]{2}[0-9]{10}$/.test(mptaascId)) {
                 showMessage('एमपीटीएएएससी प्रोफाइल आईडी दर्ज करने पर 2 अक्षर और उसके बाद 10 अंक होने चाहिए।', true); // Translated message
                 return false;
             }
 
             // Validate CAPTCHA
-            if (parseInt(formData.captchaInput) !== captchaAnswer) {
+            if (parseInt(rawFormData.captchaInput) !== captchaAnswer) {
                 showMessage('सुरक्षा कोड गलत है। कृपया पुनः प्रयास करें।', true); // Translated message
                 generateCaptcha(); // Regenerate CAPTCHA on failure
                 return false;
             }
 
             // Validate Declaration checkbox
-            if (!formData.declarationChecked) {
+            if (!document.getElementById('declaration').checked) { // Directly check the checkbox state
                 showMessage('कृपया घोषणा बॉक्स को चेक करें।', true); // Translated message
                 return false;
             }
@@ -675,29 +672,46 @@
         stateSelect.addEventListener('change', populateDistricts);
 
         // Event listener for form submission
-        studentForm.addEventListener('submit', function(event) {
+        studentForm.addEventListener('submit', async function(event) {
             event.preventDefault(); // Prevent default form submission
 
-            const formData = getFormData();
-
-            if (!validateFormData(formData)) {
+            if (!validateFormData()) { // Call validateFormData without arguments
                 return; // Stop if validation fails
             }
 
-            // This is where the form data would be sent to Getform
-            // The 'action' attribute on the <form> tag handles the submission.
-            // No explicit fetch call is needed here for basic Getform integration.
+            const formData = getFormData(); // Get the FormData object for submission
 
-            // Log form data to console (for debugging/confirmation)
-            console.log('फ़ॉर्म डेटा जमा किया गया:', formData); // Translated message
-            showMessage('फ़ॉर्म सफलतापूर्वक जमा किया गया! डेटा के लिए कंसोल देखें।'); // Translated message
+            submitButton.disabled = true; // Disable button during submission
+            submitButton.innerHTML = 'जमा हो रहा है... <div class="loading-spinner"></div>'; // Show loading text and spinner
 
-            studentForm.reset(); // Clear the form after successful "submission"
-            populateDistricts(); // Reset district dropdown
-            populateYears(); // Reset year dropdown
-            populateBooks(); // Repopulate and clear checkboxes
-            generateCaptcha(); // Regenerate CAPTCHA for new submission
-            document.getElementById('declaration').checked = false; // Uncheck declaration
+            try {
+                const response = await fetch(studentForm.action, {
+                    method: studentForm.method,
+                    body: formData, // Send FormData object directly
+                    // Getform automatically handles Content-Type for FormData
+                });
+
+                if (response.ok) { // Check if the response status is 2xx
+                    showMessage('फ़ॉर्म सफलतापूर्वक जमा किया गया!'); // Translated success message
+                    studentForm.reset(); // Clear the form
+                    populateDistricts(); // Reset district dropdown
+                    populateYears(); // Reset year dropdown
+                    populateBooks(); // Repopulate and clear checkboxes
+                    generateCaptcha(); // Regenerate CAPTCHA for new submission
+                    document.getElementById('declaration').checked = false; // Uncheck declaration
+                } else {
+                    // Handle non-OK responses from Getform (e.g., 400, 500 errors)
+                    const errorText = await response.text();
+                    console.error('Getform submission failed:', response.status, errorText);
+                    showMessage(`फ़ॉर्म जमा करने में त्रुटि हुई: ${response.status} ${response.statusText}`, true); // More specific error
+                }
+            } catch (error) {
+                console.error('फ़ॉर्म जमा करने में त्रुटि हुई:', error);
+                showMessage('फ़ॉर्म जमा करने में त्रुटि हुई। कृपया पुनः प्रयास करें।', true); // Generic network error
+            } finally {
+                submitButton.disabled = false; // Re-enable button
+                submitButton.innerHTML = 'पंजीकरण जमा करें'; // Restore original button text
+            }
         });
 
         // Initialize states and courses on page load
