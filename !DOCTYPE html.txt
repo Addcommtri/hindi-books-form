@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>हिंदी मेडिकल पुस्तकों के लिए अनुरोध फॉर्म</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .form-container {
+            background-color: #ffffff;
+            padding: 2.5rem; /* 40px */
+            border-radius: 1.5rem; /* 24px */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            border: 1px solid #e5e7eb;
+        }
+        .form-group label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem 1rem; /* 12px 16px */
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem; /* 8px */
+            font-size: 1rem;
+            color: #1f2937;
+            background-color: #f9fafb;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        /* Styling for the checkbox container */
+        .checkbox-group {
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            background-color: #f9fafb;
+            max-height: 200px; /* Limit height for scrollability */
+            overflow-y: auto; /* Enable vertical scrolling */
+        }
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-weight: 400; /* Lighter font weight for individual items */
+            color: #1f2937;
+        }
+        .checkbox-group input[type="checkbox"] {
+            width: auto; /* Override full width for checkboxes */
+            margin-right: 0.75rem;
+            appearance: none; /* Hide default checkbox */
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #6366f1; /* Indigo 500 */
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+            flex-shrink: 0; /* Prevent checkbox from shrinking */
+        }
+        .checkbox-group input[type="checkbox"]:checked {
+            background-color: #6366f1; /* Indigo 500 */
+            border-color: #6366f1;
+        }
+        .checkbox-group input[type="checkbox"]:checked::after {
+            content: '✔';
+            display: block;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ffffff;
+            font-size: 12px;
+        }
+        .checkbox-group label:last-child {
+            margin-bottom: 0; /* No margin for the last item */
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus,
+        .checkbox-group:focus-within { /* Apply focus style to the container */
+            outline: none;
+            border-color: #6366f1; /* Indigo 500 */
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); /* Indigo 500 with 20% opacity */
+        }
+        .form-group input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(0.5) sepia(1) saturate(5) hue-rotate(200deg); /* Adjust color for visibility */
+        }
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        .submit-button {
+            background-color: #6366f1; /* Indigo 500 */
+            color: #ffffff;
+            padding: 0.75rem 1.5rem; /* 12px 24px */
+            border-radius: 0.75rem; /* 12px */
+            font-weight: 600;
+            font-size: 1.125rem; /* 18px */
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.2s;
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .submit-button:hover {
+            background-color: #4f46e5; /* Indigo 600 */
+            transform: translateY(-2px);
+        }
+        .submit-button:active {
+            transform: translateY(0);
+            box-shadow: none;
+        }
+        .message-box {
+            display: none;
+            background-color: #d1fae5; /* Green 100 */
+            color: #065f46; /* Green 800 */
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-top: 1.5rem;
+            text-align: center;
+            font-weight: 500;
+            border: 1px solid #34d399; /* Green 400 */
+        }
+        .message-box.error {
+            background-color: #fee2e2; /* Red 100 */
+            color: #991b1b; /* Red 800 */
+            border: 1px solid #ef4444; /* Red 500 */
+        }
+        .loading-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #fff;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+            display: none; /* Hidden by default */
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .captcha-group {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .captcha-group input {
+            flex-grow: 1;
+        }
+        .declaration-text {
+            font-size: 0.875rem; /* Smaller text for declaration */
+            color: #4b5563;
+            margin-bottom: 1rem;
+            line-height: 1.4;
+            border: 1px solid #e5e7eb;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            background-color: #f9fafb;
+        }
+        .declaration-checkbox-container {
+            display: flex;
+            align-items: flex-start;
+            margin-top: 1rem;
+        }
+        .declaration-checkbox-container input[type="checkbox"] {
+            margin-top: 0.25rem; /* Align checkbox with text */
+            margin-right: 0.75rem;
+            flex-shrink: 0;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #6366f1; /* Indigo 500 */
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+        }
+        .declaration-checkbox-container input[type="checkbox"]:checked {
+            background-color: #6366f1;
+            border-color: #6366f1;
+        }
+        .declaration-checkbox-container input[type="checkbox"]:checked::after {
+            content: '✔';
+            display: block;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ffffff;
+            font-size: 12px;
+        }
+        .declaration-checkbox-container label {
+            font-weight: 400; /* Normal weight for declaration text */
+            color: #374151;
+            flex-grow: 1;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2 class="text-3xl font-bold text-center text-gray-800 mb-8">हिंदी मेडिकल पुस्तकों के लिए अनुरोध फॉर्म</h2>
+        <form id="studentForm" class="space-y-6" action="https://getform.io/f/axoyxoyb" method="POST">
+            <!-- Name -->
+            <div class="form-group">
+                <label for="name">पूरा नाम</label>
+                <input type="text" id="name" name="name" placeholder="अपना पूरा नाम दर्ज करें" required class="rounded-lg">
+            </div>
+
+            <!-- Father's Name -->
+            <div class="form-group">
+                <label for="fatherName">पिता का नाम</label>
+                <input type="text" id="fatherName" name="fatherName" placeholder="अपने पिता का पूरा नाम दर्ज करें" required class="rounded-lg">
+            </div>
+
+            <!-- Phone Number -->
+            <div class="form-group">
+                <label for="phone">फ़ोन नंबर</label>
+                <input type="tel" id="phone" name="phone" placeholder="उदा., 9876543210" pattern="[0-9]{10}" title="कृपया 10 अंकों का फ़ोन नंबर दर्ज करें" required class="rounded-lg">
+            </div>
+
+            <!-- Email ID -->
+            <div class="form-group">
+                <label for="email">ईमेल आईडी</label>
+                <input type="email" id="email" name="email" placeholder="उदा., student@example.com" required class="rounded-lg">
+            </div>
+
+            <!-- Date of Birth -->
+            <div class="form-group">
+                <label for="dob">जन्म तिथि</label>
+                <input type="date" id="dob" name="dob" required class="rounded-lg">
+            </div>
+
+            <!-- Gender Dropdown -->
+            <div class="form-group">
+                <label for="gender">लिंग</label>
+                <select id="gender" name="gender" required class="rounded-lg">
+                    <option value="">लिंग चुनें</option>
+                    <option value="Male">पुरुष</option>
+                    <option value="Female">महिला</option>
+                    <option value="Other">अन्य</option>
+                    <option value="Prefer not to say">बताना पसंद नहीं</option>
+                </select>
+            </div>
+
+            <!-- Category Dropdown -->
+            <div class="form-group">
+                <label for="category">श्रेणी</label>
+                <select id="category" name="category" required class="rounded-lg">
+                    <option value="">श्रेणी चुनें</option>
+                    <option value="General">सामान्य</option>
+                    <option value="SC">अनुसूचित जाति (SC)</option>
+                    <option value="ST">अनुसूचित जनजाति (ST)</option>
+                    <option value="OBC">अन्य पिछड़ा वर्ग (OBC)</option>
+                </select>
+            </div>
+
+            <!-- Address Line 1 -->
+            <div class="form-group">
+                <label for="address1">पता पंक्ति 1</label>
+                <input type="text" id="address1" name="address1" placeholder="मकान नंबर, गली का नाम" required class="rounded-lg">
+            </div>
+
+            <!-- Address Line 2 -->
+            <div class="form-group">
+                <label for="address2">पता पंक्ति 2 (वैकल्पिक)</label>
+                <input type="text" id="address2" name="address2" placeholder="क्षेत्र, लैंडमार्क" class="rounded-lg">
+            </div>
+
+            <!-- State Dropdown -->
+            <div class="form-group">
+                <label for="state">राज्य</label>
+                <select id="state" name="state" required class="rounded-lg">
+                    <option value="">राज्य चुनें</option>
+                    <!-- States will be populated by JavaScript -->
+                </select>
+            </div>
+
+            <!-- District Dropdown (auto-populate) -->
+            <div class="form-group">
+                <label for="district">जिला</label>
+                <select id="district" name="district" required class="rounded-lg">
+                    <option value="">जिला चुनें</option>
+                    <!-- Districts will be populated by JavaScript -->
+                </select>
+            </div>
+
+            <!-- Aadhar ID -->
+            <div class="form-group">
+                <label for="aadhar">आधार आईडी</label>
+                <input type="text" id="aadhar" name="aadhar" placeholder="अपना 12 अंकों का आधार आईडी दर्ज करें" pattern="[0-9]{12}" title="कृपया 12 अंकों का आधार आईडी दर्ज करें" required class="rounded-lg">
+            </div>
+
+            <!-- Samagra ID -->
+            <div class="form-group">
+                <label for="samagraId">समग्र आईडी (वैकल्पिक)</label>
+                <input type="text" id="samagraId" name="samagraId" placeholder="9 अंकों का समग्र आईडी दर्ज करें" class="rounded-lg">
+            </div>
+
+            <!-- MPTAASC Profile ID -->
+            <div class="form-group">
+                <label for="mptaascId">एमपीटीएएएससी प्रोफाइल आईडी (वैकल्पिक)</label>
+                <input type="text" id="mptaascId" name="mptaascId" placeholder="2 अक्षर और 10 अंक दर्ज करें" class="rounded-lg">
+            </div>
+
+            <!-- EWS Dropdown -->
+            <div class="form-group">
+                <label for="isEWS">क्या ईडब्ल्यूएस है?</label>
+                <select id="isEWS" name="isEWS" required class="rounded-lg">
+                    <option value="">विकल्प चुनें</option>
+                    <option value="Yes">हाँ</option>
+                    <option value="No">नहीं</option>
+                </select>
+            </div>
+
+            <!-- Course Dropdown -->
+            <div class="form-group">
+                <label for="course">पाठ्यक्रम</label>
+                <select id="course" name="course" required class="rounded-lg">
+                    <option value="">पाठ्यक्रम चुनें</option>
+                    <!-- Courses will be populated by JavaScript -->
+                </select>
+            </div>
+
+            <!-- Year Dropdown -->
+            <div class="form-group">
+                <label for="year">वर्ष</label>
+                <select id="year" name="year" required class="rounded-lg">
+                    <option value="">वर्ष चुनें</option>
+                    <option value="1st Year">पहला वर्ष</moption>
+                    <option value="2nd Year">दूसरा वर्ष</option>
+                    <option value="3rd Year">तीसरा वर्ष</option>
+                    <option value="4th Year">चौथा वर्ष</option>
+                </select>
+            </div>
+
+            <!-- Books Required Checkbox Group -->
+            <div class="form-group">
+                <label>चाही गई पुस्तकें चुनें</label>
+                <div id="booksRequiredCheckboxes" class="checkbox-group">
+                    <!-- Checkboxes will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Subjects -->
+            <div class="form-group">
+                <label for="subjects">विषय (कॉमा से अलग करें)</label>
+                <textarea id="subjects" name="subjects" rows="3" placeholder="उदा., भौतिकी, रसायन विज्ञान, गणित" class="rounded-lg"></textarea>
+            </div>
+
+            <!-- CAPTCHA -->
+            <div class="form-group">
+                <label for="captchaInput">सुरक्षा कोड</label>
+                <div class="captcha-group">
+                    <span id="captchaQuestion" class="text-lg font-semibold text-gray-800"></span>
+                    <input type="text" id="captchaInput" name="captchaInput" placeholder="उत्तर दर्ज करें" required class="rounded-lg w-24">
+                </div>
+            </div>
+
+            <!-- Declaration -->
+            <div class="form-group">
+                <div class="declaration-text">
+                    मैं घोषणा करता / करती हूँ की इस आवेदन मे दी गई समस्त जानकारी मेरे ज्ञान और विश्वास के अनुसार सत्य ,पूर्ण और सही है और मेरे द्वारा मांगे जाने पर मूल दस्तावेजों के माध्यम से दी गई जानकारी की पुष्टि की जाएगी |
+                    यदि मेरी प्रवेष्टी एक से अधिक पाठ्यक्रमों में पायी जाती है तो मैं दंडात्मक कार्यवाही के लिए स्वयं जिम्मेदार रहूँगा/रहूंगी |
+                    मेरे द्वारा मांग का अवलोकन कर लिया गया है और इस फॉर्म से मांगी गयी पुस्तकें प्राधिकारियों के निर्णय एवं उपलब्ध रहेंगी| यह फॉर्म आपको केवल पुस्तकों के लिए अनुरोध करने की सुविधा देता है, पुस्तकें प्राप्त करने का अधिकार नहीं|
+                </div>
+                <div class="declaration-checkbox-container">
+                    <input type="checkbox" id="declaration" name="declaration" required>
+                    <label for="declaration">मैं ऊपर दी गई घोषणा से सहमत हूँ।</label>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <!-- Submit Button -->
+                <button type="submit" class="submit-button">पंजीकरण जमा करें</button>
+            </div>
+        </form>
+        <div id="messageBox" class="message-box"></div>
+    </div>
+
+    <script>
+        // Data for Indian States and Districts (Expanded List)
+        const indianStatesAndDistricts = {
+            "Andhra Pradesh": ["Anantapur", "Chittoor", "East Godavari", "Guntur", "Kadapa", "Krishna", "Kurnool", "Nellore", "Prakasam", "Srikakulam", "Visakhapatnam", "Vizianagaram", "West Godavari"],
+            "Arunachal Pradesh": ["Anjaw", "Changlang", "Dibang Valley", "East Kameng", "East Siang", "Kra Daadi", "Kurung Kumey", "Lepa Rada", "Lohit", "Longding", "Lower Dibang Valley", "Lower Siang", "Lower Subansiri", "Namsai", "Pakke-Kessang", "Papum Pare", "Shi Yomi", "Siang", "Tawang", "Tirap", "Upper Siang", "Upper Subansiri", "West Kameng", "West Siang"],
+            "Assam": ["Baksa", "Barpeta", "Biswanath", "Bongaigaon", "Cachar", "Charaideo", "Chirang", "Darrang", "Dhemaji", "Dhubri", "Dibrugarh", "Dima Hasao", "Goalpara", "Golaghat", "Hailakandi", "Hojai", "Jorhat", "Kamrup Metropolitan", "Kamrup", "Karbi Anglong", "Karimganj", "Kokrajhar", "Lakhimpur", "Majuli", "Morigaon", "Nagaon", "Nalbari", "Sivasagar", "Sonitpur", "South Salmara-Mankachar", "Tamulpur", "Tinsukia", "Udalguri", "West Karbi Anglong"],
+            "Bihar": ["Araria", "Arwal", "Aurangabad", "Banka", "Begusarai", "Bhagalpur", "Bhojpur", "Buxar", "Darbhanga", "East Champaran", "Gaya", "Gopalganj", "Jamui", "Jehanabad", "Kaimur", "Katihar", "Khagaria", "Kishanganj", "Lakhisarai", "Madhepura", "Madhubani", "Munger", "Muzaffarpur", "Nalanda", "Nawada", "Patna", "Purnia", "Rohtas", "Saharsa", "Samastipur", "Saran", "Sheikhpura", "Sheohar", "Sitamarhi", "Siwan", "Supaul", "Vaishali", "West Champaran"],
+            "Chhattisgarh": ["Balod", "Baloda Bazar", "Balrampur-Ramanujganj", "Bastar", "Bemetara", "Bijapur", "Bilaspur", "Dantewada", "Dhamtari", "Durg", "Gariaband", "Gaurela-Pendra-Marwahi", "Janjgir-Champa", "Jashpur", "Kabirdham", "Kanker", "Kondagaon", "Korba", "Korea", "Mahasamund", "Mungeli", "Narayanpur", "Raigarh", "Raipur", "Rajnandgaon", "Sukma", "Surajpur", "Surguja"],
+            "Goa": ["North Goa", "South Goa"],
+            "Gujarat": ["Ahmedabad", "Amreli", "Anand", "Aravalli", "Banaskantha", "Bharuch", "Bhavnagar", "Botad", "Chhota Udaipur", "Dahod", "Dang", "Devbhoomi Dwarka", "Gandhinagar", "Gir Somnath", "Jamnagar", "Junagadh", "Kheda", "Kutch", "Mahisagar", "Mehsana", "Morbi", "Narmada", "Navsari", "Panchmahal", "Patan", "Porbandar", "Rajkot", "Sabarkantha", "Surat", "Surendranagar", "Tapi", "Vadodara", "Valsad"],
+            "Haryana": ["Ambala", "Bhiwani", "Charkhi Dadri", "Faridabad", "Fatehabad", "Gurugram", "Hisar", "Jhajjar", "Jind", "Kaithal", "Karnal", "Kurukshetra", "Mahendragarh", "Nuh", "Palwal", "Panchkula", "Panipat", "Rewari", "Rohtak", "Sirsa", "Sonipat", "Yamunanagar"],
+            "Himachal Pradesh": ["Bilaspur", "Chamba", "Hamirpur", "Kangra", "Kinnaur", "Kullu", "Lahaul and Spiti", "Mandi", "Shimla", "Sirmaur", "Solan", "Una"],
+            "Jharkhand": ["Bokaro", "Chatra", "Deoghar", "Dhanbad", "Dumka", "East Singhbhum", "Garhwa", "Giridih", "Godda", "Gumla", "Hazaribagh", "Jamtara", "Khunti", "Koderma", "Latehar", "Lohardaga", "Pakur", "Palamu", "Ramgarh", "Ranchi", "Sahebganj", "Seraikela-Kharsawan", "Simdega", "West Singhbhum"],
+            "Karnataka": ["Bagalkot", "Ballari", "Belagavi", "Bengaluru Rural", "Bengaluru Urban", "Bidar", "Chamarajanagar", "Chikkaballapur", "Chikkamagaluru", "Chitradurga", "Dakshina Kannada", "Davangere", "Dharwad", "Gadag", "Hassan", "Haveri", "Kalaburagi", "Kodagu", "Kolar", "Koppal", "Mandya", "Mysuru", "Raichur", "Ramanagara", "Shivamogga", "Tumakuru", "Udupi", "Uttara Kannada", "Vijayapura", "Yadgiri", "Vijayanagara"],
+            "Kerala": ["Alappuzha", "Ernakulam", "Idukki", "Kannur", "Kasaragod", "Kollam", "Kottayam", "Kozhikode", "Malappuram", "Palakkad", "Pathanamthitta", "Thiruvananthapuram", "Thrissur", "Wayanad"],
+            "Madhya Pradesh": ["Agar Malwa", "Alirajpur", "Anuppur", "Ashoknagar", "Balaghat", "Barwani", "Betul", "Bhind", "Bhopal", "Burhanpur", "Chhatarpur", "Chhindwara", "Damoh", "Datia", "Dewas", "Dhar", "Dindori", "Guna", "Gwalior", "Harda", "Hoshangabad", "Indore", "Jabalpur", "Jhabua", "Katni", "Khandwa", "Khargone", "Mandla", "Mandsaur", "Morena", "Narsinghpur", "Neemuch", "Panna", "Raisen", "Rajgarh", "Ratlam", "Rewa", "Sagar", "Satna", "Sehore", "Seoni", "Shahdol", "Shajapur", "Sheopur", "Shivpuri", "Sidhi", "Singrauli", "Tikamgarh", "Ujjain", "Umaria", "Vidisha", "Niwari"],
+            "Maharashtra": ["Ahmednagar", "Akola", "Amravati", "Aurangabad", "Beed", "Bhandara", "Buldhana", "Chandrapur", "Dhule", "Gadchiroli", "Gondia", "Hingoli", "Jalgaon", "Jalna", "Kolhapur", "Latur", "Mumbai City", "Mumbai Suburban", "Nagpur", "Nanded", "Nandurbar", "Nashik", "Osmanabad", "Palghar", "Parbhani", "Pune", "Raigad", "Ratnagiri", "Sangli", "Satara", "Sindhudurg", "Solapur", "Thane", "Wardha", "Washim", "Yavatmal"],
+            "Manipur": ["Bishnupur", "Chandel", "Churachandpur", "Imphal East", "Imphal West", "Jiribam", "Kakching", "Kamjong", "Kangpokpi", "Noney", "Pherzawl", "Senapati", "Tamenglong", "Tengnoupal", "Thoubal", "Ukhrul"],
+            "Meghalaya": ["East Garo Hills", "East Jaintia Hills", "East Khasi Hills", "North Garo Hills", "Ribhoi", "South Garo Hills", "South West Garo Hills", "South West Khasi Hills", "West Garo Hills", "West Jaintia Hills", "West Khasi Hills", "Eastern West Khasi Hills"],
+            "Mizoram": ["Aizawl", "Champhai", "Hnahthial", "Khawzawl", "Kolasib", "Lawngtlai", "Lunglei", "Mamit", "Saiha", "Saitual", "Serchhip"],
+            "Nagaland": ["Chümoukedima", "Dimapur", "Kiphire", "Kohima", "Longleng", "Mokokchung", "Mon", "Niuland", "Noklak", "Peren", "Phek", "Shamator", "Tuensang", "Tseminyü", "Wokha", "Zunheboto"],
+            "Odisha": ["Angul", "Balangir", "Balasore", "Bargarh", "Bhadrak", "Boudh", "Cuttack", "Debagarh", "Dhenkanal", "Gajapati", "Ganjam", "Jagatsinghpur", "Jajpur", "Jharsuguda", "Kalahandi", "Kandhamal", "Kendrapara", "Kendujhar", "Khordha", "Koraput", "Malkangiri", "Mayurbhanj", "Nabarangpur", "Nayagarh", "Nuapada", "Puri", "Rayagada", "Sambalpur", "Subarnapur", "Sundargarh"],
+            "Punjab": ["Amritsar", "Barnala", "Bathinda", "Faridkot", "Fatehgarh Sahib", "Fazilka", "Ferozepur", "Gurdaspur", "Hoshiarpur", "Jalandhar", "Kapurthala", "Ludhiana", "Mansa", "Moga", "Muktsar", "Pathankot", "Patiala", "Rupnagar", "Sangrur", "SAS Nagar (Mohali)", "Shaheed Bhagat Singh Nagar", "Sri Muktsar Sahib", "Tarn Taran"],
+            "Rajasthan": ["Ajmer", "Alwar", "Balotra", "Banswara", "Baran", "Barmer", "Beawar", "Bharatpur", "Bhilwara", "Bikaner", "Bundi", "Chittorgarh", "Churu", "Dausa", "Dholpur", "Didwana Kuchaman", "Dungarpur", "Ganganagar", "Gangapur City", "Hanumangarh", "Jaipur", "Jaipur Rural", "Jaisalmer", "Jalore", "Jhalawar", "Jhunjhunu", "Jodhpur", "Jodhpur Rural", "Karauli", "Kekri", "Khairthal-Tijara", "Kota", "Kotputli-Behror", "Nagaur", "Pali", "Phalodi", "Pratapgarh", "Rajsamand", "Salumbar", "Sanchore", "Sawai Madhopur", "Shahpura", "Sikar", "Sirohi", "Tonk", "Udaipur"],
+            "Sikkim": ["Gangtok", "Gyalshing", "Mangan", "Namchi", "Pakyong", "Soreng"],
+            "Tamil Nadu": ["Ariyalur", "Chengalpattu", "Chennai", "Coimbatore", "Cuddalore", "Dharmapuri", "Dindigul", "Erode", "Kallakurichi", "Kancheepuram", "Kanyakumari", "Karur", "Krishnagiri", "Madurai", "Mayiladuthurai", "Nagapattinam", "Namakkal", "Nilgiris", "Perambalur", "Pudukkottai", "Ramanathapuram", "Ranipet", "Salem", "Sivaganga", "Tenkasi", "Thanjavur", "Theni", "Thoothukudi", "Tiruchirappalli", "Tirunelveli", "Tirupattur", "Tiruppur", "Tiruvallur", "Tiruvannamalai", "Tiruvarur", "Vellore", "Viluppuram", "Virudhunagar"],
+            "Telangana": ["Adilabad", "Bhadradri Kothagudem", "Hanumakonda", "Hyderabad", "Jagtial", "Jangaon", "Jayashankar Bhupalpally", "Jogulamba Gadwal", "Kamareddy", "Karimnagar", "Khammam", "Komaram Bheem Asifabad", "Mahabubabad", "Mahabubnagar", "Mancherial", "Medak", "Medchal–Malkajgiri", "Mulugu", "Nagarkurnool", "Nalgonda", "Narayanpet", "Nirmal", "Nizamabad", "Peddapalli", "Rajanna Sircilla", "Ranga Reddy", "Sangareddy", "Siddipet", "Suryapet", "Vikarabad", "Wanaparthy", "Warangal", "Yadadri Bhuvanagiri"],
+            "Tripura": ["Dhalai", "Gomati", "Khowai", "North Tripura", "Sepahijala", "South Tripura", "Unakoti", "West Tripura"],
+            "Uttar Pradesh": ["Agra", "Aligarh", "Ambedkar Nagar", "Amethi", "Amroha", "Auraiya", "Ayodhya", "Azamgarh", "Badaun", "Baghpat", "Bahraich", "Ballia", "Balrampur", "Banda", "Barabanki", "Bareilly", "Basti", "Bhadohi", "Bijnor", "Budaun", "Bulandshahr", "Chandauli", "Chitrakoot", "Deoria", "Etah", "Etawah", "Farrukhabad", "Fatehpur", "Firozabad", "Gautam Buddha Nagar", "Ghaziabad", "Ghazipur", "Gonda", "Gorakhpur", "Hamirpur", "Hapur", "Hardoi", "Hathras", "Jalaun", "Jaunpur", "Jhansi", "Kannauj", "Kanpur Dehat", "Kanpur Nagar", "Kasganj", "Kaushambi", "Kheri", "Kushinagar", "Lalitpur", "Lucknow", "Maharajganj", "Mahoba", "Mainpuri", "Mathura", "Mau", "Meerut", "Mirzapur", "Moradabad", "Muzaffarnagar", "Pilibhit", "Pratapgarh", "Prayagraj", "Raebareli", "Rampur", "Saharanpur", "Sambhal", "Sant Kabir Nagar", "Shahjahanpur", "Shamli", "Shrawasti", "Siddharthnagar", "Sitapur", "Sonbhadra", "Sultanpur", "Unnao", "Varanasi"],
+            "Uttarakhand": ["Almora", "Bageshwar", "Chamoli", "Champawat", "Dehradun", "Haridwar", "Nainital", "Pauri Garhwal", "Pithoragarh", "Rudraprayag", "Tehri Garhwal", "Udham Singh Nagar", "Uttarkashi"],
+            "West Bengal": ["Alipurduar", "Bankura", "Paschim Bardhaman", "Purba Bardhaman", "Birbhum", "Cooch Behar", "Dakshin Dinajpur", "Darjeeling", "Hooghly", "Howrah", "Jalpaiguri", "Jhargram", "Kalimpong", "Kolkata", "Malda", "Murshidabad", "Nadia", "North 24 Parganas", "Paschim Medinipur", "Purba Medinipur", "Purulia", "South 24 Parganas", "Uttar Dinajpur"],
+            "Andaman and Nicobar Islands": ["Nicobar", "North and Middle Andaman", "South Andaman"],
+            "Chandigarh": ["Chandigarh"],
+            "Dadra and Nagar Haveli and Daman and Diu": ["Dadra and Nagar Haveli", "Daman", "Diu"],
+            "Lakshadweep": ["Lakshadweep"],
+            "Delhi": ["Central Delhi", "East Delhi", "New Delhi", "North Delhi", "North East Delhi", "North West Delhi", "Shahdara", "South Delhi", "South East Delhi", "South West Delhi", "West Delhi"],
+            "Puducherry": ["Karaikal", "Mahe", "Puducherry", "Yanam"]
+        };
+
+        // List of courses from MPMSU Jabalpur
+        const mpmsuCourses = [
+            "MBBS", "MD/MS", "Diploma (Medical)", "M.Ch/DM",
+            "BDS", "MDS",
+            "BAMS", "MD (Ayurvedic)",
+            "BUMS", "MD (Unani)",
+            "BSMS", "MD (Siddha)",
+            "BNYS", "MD (Yoga & Naturopathy)",
+            "BHMS", "MD (Homeopathic)",
+            "B.Sc. Nursing", "M.Sc. Nursing", "Post Basic B.Sc. Nursing",
+            "UG Degree (Other)", "PG Degree (Other)", "Diploma (Other)"
+        ];
+
+        // List of books from the provided PDF, formatted as "Subject - Book Name - Author - Publisher - Edition - Year"
+        const booksList = [
+            "एनाटॉमी - एनाटॉमी शरीर रचना विज्ञान अपर लिंब एंड थॉरैक्स भाग 1 - विश्राम सिंह - RELX - प्रथम हिन्दी संस्करण - 2022",
+            "एनाटॉमी - एनाटॉमी शरीर रचना विज्ञान एब्डॉमन और लोअर लिंब भाग 2 - विश्राम सिंह - RELX - प्रथम हिन्दी संस्करण - 2022",
+            "एनाटॉमी - एनाटॉमी शरीर रचना विज्ञान हेड, नेक और ब्रेन भाग 3 - विश्राम सिंह - RELX - प्रथम हिन्दी संस्करण - 2022",
+            "फिजियोलॉजी - मेडिकल फिजियोलॉजी - भाग 1 - इन्दु खुराना - RELX - प्रथम हिन्दी संस्करण - 2022",
+            "फिजियोलॉजी - मेडिकल फिजियोलॉजी भाग 2 - इन्दु खुराना - RELX - प्रथम हिन्दी संस्करण - 2022",
+            "बायोकेमिस्ट्रि - मेडिकल बायोकेमिस्ट्रि - भाग 1 - दिनेश पूरी - RELX - प्रथम हिन्दी संस्करण - 2022",
+            "बायोकेमिस्ट्रि - मेडिकल बायोकेमिस्ट्रि - भाग 2 - दिनेश पूरी - RELX - प्रथम हिन्दी संस्करण - 2022",
+            "कम्यूनिटी मैडिसिन - प्रिवेंटिव एंड सोश्ल मैडिसिन - पार्क - BHANOT - प्रथम हिन्दी संस्करण - 2023",
+            "नाक, कान एवं गला - इयर, नोज और थ्रोट के रो एवं हेड और नेक की सर्जरी - ढींगरा - RELX - प्रथम हिन्दी संस्करण - 2023",
+            "फोरेंसिक मेडिसिन - फोरेंसिक मेडिसिन एवं ऑक्सिकॉलॉजी - इगनीशिऔस - RELX - प्रथम हिन्दी संस्करण - 2023",
+            "मेडिसिन - डेविडसन मेडिसिन के सिद्धांत और अभ्यास - राल्सोन - RELX - प्रथम हिन्दी संस्करण - 2023",
+            "माइक्रोबायोलॉजी - एसेंशियल्स मेडिकल माइक्रोबायोलॉजी सूक्ष्म जीव विज्ञान - शास्त्री - JAYPEE - प्रथम हिन्दी संस्करण - 2023",
+            "गाइनेकोलॉजी - शॉ टैक्स्टबूक ऑफ गाइनेकोलॉजी - कुमार - RELX - प्रथम हिन्दी संस्करण - 2023",
+            "ऑब्सटिक्स - दत्ता प्रसूति-विज्ञान की पाठ्यपुस्तक - कोनार - JAYPEE - प्रथम हिन्दी संस्करण - 2023",
+            "ओपथलमोलॉजी - पार्सन्स डिज़ीज ऑफ आई - सिहोता - RELX - प्रथम हिन्दी संस्करण - 2023",
+            "ऑर्थोपेडिक्स - टैक्स्टबूक ऑफ ऑर्थोपेडिक्स हड्डी रोग की पाठ्यपुस्तक - सूद - RELX - प्रथम हिन्दी संस्करण - 2023",
+            "पेडियाट्रिक्स - घई एसेंशियल पीडियाट्रिक्स - पॉल - CBS - प्रथम हिन्दी संस्करण - 2023",
+            "पैथोलोजी - विकृति विज्ञान की पाठ्यपुस्तक - राजेश्वरी - RELX - प्रथम हिन्दी संस्करण - 2023",
+            "फार्माकॉलॉजी - फार्माकोलॉजी एवं फार्माकोथेरेप्यूटिक्स - सतोसकर - RELX - प्रथम हिन्दी संस्करण - 2023",
+            "सर्जरी - शल्य चिकित्स के सिद्धांत और अभ्यास - गार्डेन - RELX - प्रथम हिन्दी संस्करण - 2023"
+        ];
+
+
+        const yearsOfStudy = ["पहला वर्ष", "दूसरा वर्ष", "तीसरा वर्ष", "चौथा वर्ष"]; // Translated years
+
+        const stateSelect = document.getElementById('state');
+        const districtSelect = document.getElementById('district');
+        const courseSelect = document.getElementById('course');
+        const yearSelect = document.getElementById('year');
+        const booksRequiredCheckboxesDiv = document.getElementById('booksRequiredCheckboxes'); // Get the new div
+        const studentForm = document.getElementById('studentForm');
+        const messageBox = document.getElementById('messageBox');
+        const captchaQuestionSpan = document.getElementById('captchaQuestion');
+        let captchaAnswer = 0; // To store the correct CAPTCHA answer
+
+        // Function to generate CAPTCHA
+        function generateCaptcha() {
+            const num1 = Math.floor(Math.random() * 10) + 1; // Random number between 1 and 10
+            const num2 = Math.floor(Math.random() * 10) + 1; // Random number between 1 and 10
+            captchaAnswer = num1 + num2;
+            captchaQuestionSpan.textContent = `${num1} + ${num2} = ?`;
+        }
+
+        // Function to populate states dropdown
+        function populateStates() {
+            for (const state in indianStatesAndDistricts) {
+                const option = document.createElement('option');
+                option.value = state;
+                option.textContent = state;
+                stateSelect.appendChild(option);
+            }
+        }
+
+        // Function to populate districts dropdown based on selected state
+        function populateDistricts() {
+            const selectedState = stateSelect.value;
+            districtSelect.innerHTML = '<option value="">जिला चुनें</option>'; // Clear existing districts, translated
+
+            if (selectedState && indianStatesAndDistricts[selectedState]) {
+                indianStatesAndDistricts[selectedState].forEach(district => {
+                    const option = document.createElement('option');
+                    option.value = district;
+                    option.textContent = district;
+                    districtSelect.appendChild(option);
+                });
+            }
+        }
+
+        // Function to populate courses dropdown
+        function populateCourses() {
+            courseSelect.innerHTML = '<option value="">पाठ्यक्रम चुनें</option>'; // Clear existing options, translated
+            mpmsuCourses.forEach(course => {
+                const option = document.createElement('option');
+                option.value = course;
+                option.textContent = course;
+                courseSelect.appendChild(option);
+            });
+        }
+
+        // Function to populate years dropdown
+        function populateYears() {
+            yearSelect.innerHTML = '<option value="">वर्ष चुनें</option>'; // Clear existing options, translated
+            yearsOfStudy.forEach(year => {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                yearSelect.appendChild(option);
+            });
+        }
+
+        // Function to populate books checkboxes
+        function populateBooks() {
+            booksRequiredCheckboxesDiv.innerHTML = ''; // Clear existing checkboxes
+            booksList.forEach((book, index) => {
+                const label = document.createElement('label');
+                label.htmlFor = `book-${index}`;
+                label.className = 'flex items-center cursor-pointer'; // Tailwind classes for alignment
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = `book-${index}`;
+                checkbox.name = 'booksRequired';
+                checkbox.value = book;
+                checkbox.className = 'form-checkbox h-5 w-5 text-indigo-600 rounded'; // Tailwind for styling
+
+                const span = document.createElement('span');
+                span.className = 'ml-2 text-gray-700'; // Tailwind for text styling
+                span.textContent = book;
+
+                label.appendChild(checkbox);
+                label.appendChild(span);
+                booksRequiredCheckboxesDiv.appendChild(label);
+            });
+        }
+
+        // Display message function
+        function showMessage(message, isError = false) {
+            messageBox.textContent = message;
+            messageBox.style.display = 'block';
+            messageBox.classList.toggle('error', isError);
+            setTimeout(() => {
+                messageBox.style.display = 'none';
+            }, 5000); // Hide after 5 seconds
+        }
+
+        // Function to get form data
+        function getFormData() {
+            // Collect selected books from checkboxes
+            const selectedBooks = Array.from(booksRequiredCheckboxesDiv.querySelectorAll('input[name="booksRequired"]:checked'))
+                                     .map(checkbox => checkbox.value);
+
+            return {
+                name: document.getElementById('name').value,
+                fatherName: document.getElementById('fatherName').value,
+                phone: document.getElementById('phone').value,
+                email: document.getElementById('email').value,
+                dob: document.getElementById('dob').value,
+                gender: document.getElementById('gender').value,
+                category: document.getElementById('category').value,
+                address1: document.getElementById('address1').value,
+                address2: document.getElementById('address2').value,
+                state: document.getElementById('state').value,
+                district: document.getElementById('district').value,
+                aadhar: document.getElementById('aadhar').value,
+                samagraId: document.getElementById('samagraId').value,
+                mptaascId: document.getElementById('mptaascId').value,
+                isEWS: document.getElementById('isEWS').value,
+                course: document.getElementById('course').value,
+                year: document.getElementById('year').value,
+                booksRequired: selectedBooks, // Now an array of selected books
+                subjects: document.getElementById('subjects').value.split(',').map(s => s.trim()).filter(s => s),
+                captchaInput: document.getElementById('captchaInput').value, // Get CAPTCHA input
+                declarationChecked: document.getElementById('declaration').checked // Get declaration checkbox state
+            };
+        }
+
+        // Function to validate form data
+        function validateFormData(formData) {
+            // Basic validation for required fields
+            if (!formData.name || !formData.fatherName || !formData.phone || !formData.email || !formData.dob || !formData.gender || !formData.category || !formData.address1 || !formData.state || !formData.district || !formData.aadhar || !formData.isEWS || !formData.course || !formData.year) {
+                showMessage('कृपया सभी आवश्यक फ़ील्ड भरें।', true); // Translated message
+                return false;
+            }
+
+            // Validate 10-digit phone number
+            const phonePattern = /^[0-9]{10}$/;
+            if (!phonePattern.test(formData.phone)) {
+                showMessage('कृपया 10 अंकों का वैध फ़ोन नंबर दर्ज करें।', true); // Translated message
+                return false;
+            }
+
+            // Validate email format
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailPattern.test(formData.email)) {
+                showMessage('कृपया एक वैध ईमेल पता दर्ज करें।', true); // Translated message
+                return false;
+            }
+
+            // Validate 12-digit Aadhar ID
+            const aadharPattern = /^[0-9]{12}$/;
+            if (!aadharPattern.test(formData.aadhar)) {
+                showMessage('कृपया 12 अंकों का वैध आधार आईडी दर्ज करें।', true); // Translated message
+                return false;
+            }
+
+            // Validate 9-digit Samagra ID (if entered)
+            const samagraId = formData.samagraId.trim();
+            if (samagraId !== '' && !/^[0-9]{9}$/.test(samagraId)) {
+                showMessage('समग्र आईडी दर्ज करने पर ठीक 9 अंकों का होना चाहिए।', true); // Translated message
+                return false;
+            }
+
+            // Validate MPTAASC Profile ID (if entered)
+            const mptaascId = formData.mptaascId.trim();
+            if (mptaascId !== '' && !/^[A-Za-z]{2}[0-9]{10}$/.test(mptaascId)) {
+                showMessage('एमपीटीएएएससी प्रोफाइल आईडी दर्ज करने पर 2 अक्षर और उसके बाद 10 अंक होने चाहिए।', true); // Translated message
+                return false;
+            }
+
+            // Validate CAPTCHA
+            if (parseInt(formData.captchaInput) !== captchaAnswer) {
+                showMessage('सुरक्षा कोड गलत है। कृपया पुनः प्रयास करें।', true); // Translated message
+                generateCaptcha(); // Regenerate CAPTCHA on failure
+                return false;
+            }
+
+            // Validate Declaration checkbox
+            if (!formData.declarationChecked) {
+                showMessage('कृपया घोषणा बॉक्स को चेक करें।', true); // Translated message
+                return false;
+            }
+
+            return true;
+        }
+
+        // Event listener for state change
+        stateSelect.addEventListener('change', populateDistricts);
+
+        // Event listener for form submission
+        studentForm.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            const formData = getFormData();
+
+            if (!validateFormData(formData)) {
+                return; // Stop if validation fails
+            }
+
+            // This is where the form data would be sent to Getform
+            // The 'action' attribute on the <form> tag handles the submission.
+            // No explicit fetch call is needed here for basic Getform integration.
+
+            // Log form data to console (for debugging/confirmation)
+            console.log('फ़ॉर्म डेटा जमा किया गया:', formData); // Translated message
+            showMessage('फ़ॉर्म सफलतापूर्वक जमा किया गया! डेटा के लिए कंसोल देखें।'); // Translated message
+
+            studentForm.reset(); // Clear the form after successful "submission"
+            populateDistricts(); // Reset district dropdown
+            populateYears(); // Reset year dropdown
+            populateBooks(); // Repopulate and clear checkboxes
+            generateCaptcha(); // Regenerate CAPTCHA for new submission
+            document.getElementById('declaration').checked = false; // Uncheck declaration
+        });
+
+        // Initialize states and courses on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            populateStates();
+            populateCourses();
+            populateYears();
+            populateBooks();
+            generateCaptcha(); // Generate CAPTCHA on initial load
+        });
+    </script>
+</body>
+</html>
