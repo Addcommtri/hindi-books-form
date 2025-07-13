@@ -679,48 +679,7 @@
         // Event listener for state change
         stateSelect.addEventListener('change', populateDistricts);
 
-        // Event listener for form submission
-        studentForm.addEventListener('submit', async function(event) {
-            event.preventDefault(); // Prevent default form submission
-
-            if (!validateFormData()) { // Call validateFormData without arguments
-                return; // Stop if validation fails
-            }
-
-            const formData = getFormData(); // Get the FormData object for submission
-
-            submitButton.disabled = true; // Disable button during submission
-            submitButton.innerHTML = 'जमा हो रहा है... <div class="loading-spinner"></div>'; // Show loading text and spinner
-
-            try {
-                const response = await fetch(studentForm.action, {
-                    method: studentForm.method,
-                    body: formData, // Send FormData object directly
-                    // Getform automatically handles Content-Type for FormData
-                });
-
-                if (response.ok) { // Check if the response status is 2xx
-                    showMessage('फ़ॉर्म सफलतापूर्वक जमा किया गया!'); // Translated success message
-                    studentForm.reset(); // Clear the form
-                    populateDistricts(); // Reset district dropdown
-                    populateYears(); // Reset year dropdown
-                    populateBooks(); // Repopulate and clear checkboxes
-                    generateCaptcha(); // Regenerate CAPTCHA for new submission
-                    document.getElementById('declaration').checked = false; // Uncheck declaration
-                } else {
-                    // Handle non-OK responses from Getform (e.g., 400, 500 errors)
-                    const errorText = await response.text();
-                    console.error('Getform submission failed:', response.status, errorText);
-                    showMessage(`फ़ॉर्म जमा करने में त्रुटि हुई: ${response.status} ${response.statusText}`, true); // More specific error
-                }
-            } catch (error) {
-                console.error('फ़ॉर्म जमा करने में त्रुटि हुई:', error);
-                showMessage('फ़ॉर्म जमा करने में त्रुटि हुई। कृपया पुनः प्रयास करें।', true); // Generic network error
-            } finally {
-                submitButton.disabled = false; // Re-enable button
-                submitButton.innerHTML = 'पंजीकरण जमा करें'; // Restore original button text
-            }
-        });
+        
 
         // Initialize states and courses on page load
         document.addEventListener('DOMContentLoaded', () => {
